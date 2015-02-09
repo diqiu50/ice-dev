@@ -1,0 +1,86 @@
+/*
+ * main.cpp
+ *
+ *  Created on: Oct 18, 2012
+ *      Author: Ice
+ */
+
+#include <iostream>
+#include <time.h>
+#include <ext/hash_map>
+#include <map>
+#include <stdio.h>
+#include <string.h>
+
+namespace std
+{
+    using namespace __gnu_cxx;
+
+    struct string_hash
+    {
+    	inline size_t operator()(const string& str) const
+    	{
+    	    return __stl_hash_string(str.c_str());
+    	}
+    };
+    struct str_equ
+    {
+        inline bool operator()(const string &p1, const string &p2) const
+        {
+            return strcmp(p1.c_str(), p2.c_str()) == 0;
+        }
+    };
+    struct str_less
+	{
+		inline bool operator()(const string &p1, const string &p2) const
+		{
+			return strcmp(p1.c_str(), p2.c_str()) < 0;
+		}
+	};
+
+};
+
+using namespace std;
+
+int main()
+{
+	map<string, int, str_less> m;
+	hash_map<string, int, string_hash, str_equ> h;
+	clock_t t1 = clock();
+	for (int i=0; i<10000000; i++)
+	{
+		char buff[128];
+		sprintf(buff, "%d", i);
+		m.insert(make_pair(buff, i));
+	}
+	clock_t t2 = clock();
+	cout << "map insert time : " << t2-t1 << endl;
+	t1 = clock();
+	for (int i=0; i<10000000; i++)
+	{
+		char buff[128];
+		sprintf(buff, "%d", i);
+		h.insert(make_pair(buff, i));
+	}
+	t2 = clock();
+	cout << "hash_map insert time : " << t2-t1 << endl;
+	t1 = clock();
+	for (int i=0; i<10000000; i++)
+	{
+		char buff[128];
+		sprintf(buff, "%d", i);
+		m.find(buff);
+	}
+	t2 = clock();
+	cout << "map find time : " << t2-t1 << endl;
+	t1 = clock();
+	for (int i=0; i<10000000; i++)
+	{
+		char buff[128];
+		sprintf(buff, "%d", i);
+		h.find(buff);
+	}
+	t2 = clock();
+	cout << "hash_map find time : " << t2-t1 << endl;
+	return 0;
+}

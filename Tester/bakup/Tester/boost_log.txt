@@ -1,0 +1,37 @@
+#include <boost/log/trivial.hpp>
+#include <boost/filesystem.hpp>
+#include <iostream>
+
+using namespace std;
+using namespace boost::filesystem;
+
+ extern "C" {
+ long _InterlockedCompareExchange(long volatile *ptr, long newval, long oldval)
+ 	 {
+	 	 __sync_val_compare_and_swap(ptr, oldval, newval);
+	 	 return 0;
+ 	 }
+ }
+
+
+int main(int, char*[])
+{
+	path p = "../";
+
+	recursive_directory_iterator begin_itr(p);
+	p = *begin_itr;
+	string s = p.string();
+	cout << s.substr(3)<< endl;
+	s.resize(1);
+	cout << s << endl;
+
+    BOOST_LOG_TRIVIAL(trace) << "A trace severity message";
+
+    BOOST_LOG_TRIVIAL(debug) << "A debug severity message";
+    BOOST_LOG_TRIVIAL(info) << "An informational severity message";
+    BOOST_LOG_TRIVIAL(warning) << "A warning severity message";
+    BOOST_LOG_TRIVIAL(error) << "An error severity message";
+    BOOST_LOG_TRIVIAL(fatal) << "A fatal severity message";
+
+    return 0;
+}

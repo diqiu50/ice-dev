@@ -1,0 +1,110 @@
+<request>
+  <item name='operation'><![CDATA[serverCmd]]></item>
+  <item name='zky_siteid'><![CDATA[100]]></item>
+  <item name='username'><![CDATA[nonameyet]]></item>
+  <item name='trans_id'><![CDATA[38]]></item>
+  <command>
+    <cmd psize="8" order="zky_fileobjid" reverse="true" opr="retlist" start_idx="0">
+      <conds>
+        <stat type="AND">
+          <term type="group" reverse="true" order="false" zky_ctobjid="giccreators_querynew_term_h">
+            <cond type="AND" zky_opr="eq" unicom_query_term_positon="true">
+              <term type="arith" zky_ctobjid="giccreators_querynew_term_h" order="false" reverse="true">
+                <selector type="attr" aname="zky_fileobjid"><![CDATA[]]></selector>
+                <cond type="arith" ctype="const" zky_opr="an"><![CDATA[*]]></cond>
+              </term>
+              <term type="arith" zky_ctobjid="giccreators_querynew_term_h" order="false" reverse="false">
+                <selector type="attr" aname="zky_otype"><![CDATA[]]></selector>
+                <cond type="arith" ctype="const" zky_opr="eq"><![CDATA[doc_section]]></cond>
+              </term>
+              <term type="arith" zky_ctobjid="giccreators_querynew_term_h" order="false" reverse="false">
+                <selector type="attr" aname="DocumentType"><![CDATA[]]></selector>
+                <cond type="arith" ctype="const" zky_opr="eq"><![CDATA[正文]]></cond>
+              </term>
+              <term type="wordand" need_resp="true" reverse="false" order="false" zky_ctobjid="giccreators_querynew_term_keywords_h">
+                <selector type="tags"><![CDATA[]]></selector>
+                <cond type="tags" zky_opr="eq"><![CDATA[联通 考核 人员]]></cond>
+              </term>
+              <term type="wordand">
+                <selector type="wordand" aname="un_read_permission"></selector>
+                <cond type=”wordand“ zky_opr="or"><![CDATA[CN=宋康/OU=信息化事业部/O=AH.Unicom]]></cond>
+              </term>
+            </cond>
+            <group_conds>
+              <group_cond><![CDATA[zky_fileobjid]]></group_cond>
+            </group_conds>
+          </term>
+        </stat>
+        <cond type="AND"/>
+      </conds>
+      <fnames>
+        <fname type="1" zky_ctobjid="giccreators_query_fname_h" join_idx="0">
+          <oname>zky_ctime</oname>
+          <cname>zky_ctime</cname>
+        </fname>
+        <fname type="2" zky_ctobjid="giccreators_query_fname_h" join_idx="0">
+          <oname>zky_context</oname>
+          <cname>zky_context</cname>
+        </fname>
+        <fname type="1" zky_ctobjid="giccreators_query_fname_h" join_idx="0">
+          <oname>zky_rscfn</oname>
+          <cname>zky_rscfn</cname>
+        </fname>
+        <fname type="1" zky_ctobjid="giccreators_query_fname_h" join_idx="0">
+          <oname>zky_type</oname>
+          <cname>zky_type</cname>
+        </fname>
+        <fname type="1" zky_ctobjid="giccreators_query_fname_h" join_idx="0">
+          <oname>zky_objid</oname>
+          <cname>zky_objid</cname>
+        </fname>
+        <fname type="1" zky_ctobjid="giccreators_query_fname_h" join_idx="0">
+          <oname>unicom_title_objid</oname>
+          <cname>unicom_title_objid</cname>
+        </fname>
+        <fname type="1" zky_ctobjid="giccreators_query_fname_h" join_idx="0">
+          <oname>Package/Content/Package/Description/DocumentType</oname>
+          <cname>DocumentType</cname>
+        </fname>
+        <fname type="1" zky_ctobjid="giccreators_query_fname_h" join_idx="0">
+          <oname>Package/Description/Title</oname>
+          <cname>Title</cname>
+        </fname>
+        <fname type="1" zky_ctobjid="giccreators_query_fname_h" join_idx="1">
+          <oname>Package/Description/RecordID</oname>
+          <cname>RecordID</cname>
+        </fname>
+        <fname type="1" zky_ctobjid="giccreators_query_fname_h" join_idx="1">
+          <oname>Package/Description/CreateDate</oname>
+          <cname>CreateDate</cname>
+        </fname>
+        <fname type="1" zky_ctobjid="giccreators_query_fname_h" join_idx="1">
+          <oname>Package/Description/ClassificationName</oname>
+          <cname>ClassificationName</cname>
+        </fname>
+        <fname type="x" zky_ctobjid="giccreators_query_fname_h" join_idx="1">
+          <oname>xml</oname>
+          <cname>xml</cname>
+        </fname>
+      </fnames>
+      <joins>
+        <join join_type="objid" join_attridx="0" zky_ctobjid="giccreators_query_join_h" join_attr="unicom_title_objid"/>
+      </joins>
+    </cmd>
+  </command>
+  <item name='sendto'><![CDATA[seserver]]></item>
+  <item name='loginobj'><![CDATA[true]]></item>
+  <item name='zkyurldocdid'><![CDATA[7306]]></item>
+  <item name='operation'><![CDATA[retrieveFullVpd]]></item>
+  <item name='OsName'><![CDATA[Linux]]></item>
+  <item name='userAgent'><![CDATA[Mozilla/5.0 (Windows NT 6.3; WOW64; rv:27.0) Gecko/20100101 Firefox/27.0]]></item>
+  <item name='trans_id'><![CDATA[1713]]></item>
+  <item name='subOpr'><![CDATA[]]></item>
+  <item name='OsArch'><![CDATA[amd64]]></item>
+  <item name='loginobj'><![CDATA[true]]></item>
+  <item name='OsVersion'><![CDATA[3.0.0-12-server]]></item>
+  <zky_cookies>
+    <cookie zky_name="JSESSIONID"><![CDATA[3A05CB0FF7A3EF89FACA1F2212750BE6]]></cookie>
+    <cookie zky_name="zky_browserid"><![CDATA[0]]></cookie>
+  </zky_cookies>
+</request>

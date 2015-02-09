@@ -1,0 +1,45 @@
+/*
+ * boost_client.cpp
+ *
+ *  Created on: 2013-3-15
+ *      Author: Ice
+ */
+
+
+#include <iostream>
+#include <boost/asio.hpp>
+
+using namespace boost::asio;
+using namespace std;
+
+int main(int argv, char** argc)
+{
+	io_service client;
+	short port = 5000;
+	try
+	{
+		boost::shared_ptr<ip::tcp::socket> sk(new ip::tcp::socket(client));
+		ip::tcp::endpoint ep(ip::address_v4::from_string("192.168.99.86"), port);
+		boost::system::error_code ec; 
+		sk->connect(ep);
+		if (ec)
+		{
+			cout << boost::system::system_error(ec).what() << std::endl; 
+			return -1;
+		}
+
+		const char *buff = "hello world!";
+		size_t len = sk->write_some(buffer(buff), ec); 
+		if (ec)
+		{
+			cout << boost::system::system_error(ec).what() << std::endl; 
+			return -1;
+		}
+	}
+	catch (const exception &e)
+	{
+		cout << e.what() << endl;
+	}
+}
+
+//g++ -o client.exe boost_client.cpp  -lboost_system

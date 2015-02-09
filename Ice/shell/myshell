@@ -1,0 +1,63 @@
+#!/bin/bash
+PATH=/bin:/sbin:/usr/bin:/usr/sbin:/usr/local/bin:/usr/local/sbin
+
+#export PATH
+#echo $PATH
+#echo $LOGNAME
+#echo `pwd` 
+#echo `uname -a` 
+#echo "Today: `date +%Y%M%d`"
+#exit 0
+
+#read -p "input filename: " fileuser
+#filename=${fileuser:-"filename"}
+#date1=$(date --date='2 days ago' +%Y%m%d)
+#date1=`date --date='2 days ago' +%Y%m%d`
+#date2=$(date --date='1 days ago' +%Y%m%d)
+#date3=$(date +%Y%m%d)
+#file1=${filename}${date1}
+#file2=$filename$date2
+#file3=${filename}$date3
+#touch "$file1"
+##touch '$file2'
+#touch $file2
+#touch ${file3}
+
+#awk -F "|" '{ printf("%-9s%-12s%5s%5s%-83s%-11s%-11s%-7s\n",$1,$2,$3,$4,$5,$6,$7,$8)}' aaa.txt > converted.txt
+
+#awk -F "\t" 'BEGIN {date = 0; printf "<records>\n"} {if (date != $2 && data !=0) printf "</records>\n<records>\n"; date=$2; printf("  <city=\"%s\" date=\"%s\" num=\"%s\"/>\n",$1,$2,$3)} END {printf "</records>\n"}'
+
+#a=3
+#b=4
+#echo $((a*b))
+
+
+#echo $(ls)
+
+i=11
+if [ "$i" -eq 10 ]
+then
+	echo "sxsss"
+fi
+
+exit
+let ii=10;
+for i in `ls`
+do
+	echo $i
+	#if (("$ii" = 50)) 
+	if [ "$i" -eq 10 ]
+	then
+		echo "sxsss"
+	fi
+done
+
+#for ((i=1; i<10;i++))
+#do
+#	echo $i
+#done
+
+#sed -e "s/^INCDIRS.*scws.*$/INCDIRS = -I..\/ -I..\/..\/Include/" Makefile
+
+
+awk  'BEGIN {SUM7=0}{ SUM7+=$7} END {printf("%d\n", SUM7)}'  a.txt

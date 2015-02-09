@@ -1,0 +1,96 @@
+/*
+ * maip.cpp
+ *
+ *  Created on: Aug 14, 2012
+ *      Author: Ice
+ */
+
+#include <stdio.h>
+#include <iostream>
+#include <tr1/memory>
+#include <windef.h>
+#include <windows.h>
+#include <winsock2.h>
+#include <queue>
+
+using namespace std;
+
+CRITICAL_SECTION cs;
+
+class Bird
+{
+	static queue<tr1::shared_ptr<Bird> > mBirds;
+	int mAge;
+public:
+	Bird()
+	{
+		mAge = 1;
+		cout << "create" << endl;
+	}
+	~Bird()
+	{
+		mAge = 0;
+		cout << "delete" << endl;
+	}
+	void fly()
+	{
+		mAge = 3;
+		cout << "fly" << endl;
+	}
+
+	static void create()
+	{
+		tr1::shared_ptr<Bird> bird(new Bird());
+		EnterCriticalSection(&cs);
+		mBirds.push(bird);
+		LeaveCriticalSection(&cs);
+	}
+	static void kill()
+	{
+		tr1::shared_ptr<Bird> bird;
+		EnterCriticalSection(&cs);
+		if (!mBirds.empty())
+		{
+			bird = mBirds.back();
+			mBirds.pop();
+		}
+		LeaveCriticalSection(&cs);
+		if (bird) bird->fly();
+	}
+};
+
+queue<tr1::shared_ptr<Bird> >  Bird::mBirds;
+
+DWORD WINAPI threadFun1(void *obj)
+{
+	while(1)
+	{
+		Bird::create();
+	}
+	return 0;
+}
+
+DWORD WINAPI threadFun2(void *obj)
+{
+	while(1)
+	{
+		Bird::kill();
+	}
+	return 0;
+}
+
+int main()
+{
+	InitializeCriticalSection(&cs);
+	DWORD tid1, tid2;
+	HANDLE t1 = CreateThread(NULL, 0, threadFun1, &tid1, 0, &tid1);
+	cout << "New thread : " << tid1 << endl;
+	HANDLE t2 = CreateThread(NULL, 0, threadFun2, &tid2, 0, &tid2);
+	cout << "New thread : " << tid2 << endl;
+
+	WaitForSingleObject(t1, INFINITE);
+	WaitForSingleObject(t2, INFINITE);
+	DeleteCriticalSection(&cs);
+	getchar();
+	return 0;
+}

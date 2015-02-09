@@ -1,0 +1,78 @@
+/*
+ * main.cpp
+ *
+ *  Created on: 2013-4-25
+ *      Author: Ice
+ */
+
+#include <iostream>
+#include <cassert>
+
+using namespace std;
+
+class AirplaneRep {
+};
+
+class Airplane {
+public:
+    static void* operator new(size_t size);
+    static void operator delete(void *deadObj, size_t size);
+
+private:
+    union {
+    	AirplaneRep *rep;
+        Airplane *next;
+    };
+
+    static const int BLOCK_SIZE;
+    static Airplane *smHeadOfFreeList;
+};
+
+Airplane *Airplane::smHeadOfFreeList;
+const int Airplane::BLOCK_SIZE = 512;
+
+
+void* Airplane::operator new(size_t size) {
+    if (size != sizeof(Airplane))
+        return ::operator new(size);
+    
+    Airplane *p = smHeadOfFreeList;
+    if (p)
+        smHeadOfFreeList = p->next;
+    else {
+        Airplane *newBlock = static_cast<Airplane*>
+        (::operator new(BLOCK_SIZE*sizeof(Airplane)));
+        for (int i=1; i<BLOCK_SIZE-1; i++) {
+        	newBlock[i].next = &newBlock[i+1];
+        }
+        newBlock[BLOCK_SIZE-1].next = NULL;
+        p = newBlock;
+        smHeadOfFreeList = &newBlock[1];
+    }
+    return p;
+}
+
+void Airplane::operator delete(void *deadObj, size_t size) {
+	if (deadObj == 0) return;
+
+	if (sizeof(Airplane)==size) {
+		::operator delete(deadObj);
+		return ;
+	}
+
+	Airplane *carcass = static_cast<Airplane*>(deadObj);
+	carcass->next = smHeadOfFreeList;
+	smHeadOfFreeList = carcass;
+}
+
+int main(int argc, char** argv) {
+	clock_t c1 = clock();
+	for (int i=0; i<100000000; i++)
+	{
+		Airplane *pa = new Airplane;
+		delete pa;
+	}
+	cout << "time cost: " << clock()-c1 << " ms." << endl;
+}
+
+

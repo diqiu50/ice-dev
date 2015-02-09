@@ -1,0 +1,59 @@
+/*
+ * boost_client.cpp
+ *
+ *  Created on: 2013-3-15
+ *      Author: Ice
+ */
+
+#include <iostream>
+#include <boost/asio.hpp>
+#include <boost/array.hpp>
+
+using namespace boost::asio;
+using namespace std;
+
+int main(int argv, char** argc)
+{
+	io_service server;
+	short port = 5000;
+	try
+	{
+
+		ip::tcp::endpoint ep(ip::address_v4::from_string("192.168.99.8"), port);
+		ip::tcp::acceptor acceptor(server, ep);
+		boost::shared_ptr<ip::tcp::socket> sk(new ip::tcp::socket(server));
+
+		do
+		{
+			acceptor.accept(*sk);
+			cout << sk->remote_endpoint().address() << endl;
+
+			boost::system::error_code error;
+			boost::array<char, 128> buff;
+			sk->read_some(boost::asio::buffer(buff), error);
+			if (error == boost::asio::error::eof)
+			{
+				continue;
+			}
+			else if (error)
+			{
+				cout << boost::system::system_error(error).what() << std::endl;
+				sk->close();
+				break;
+			}
+			else
+			{
+				cout << buff.data() << endl;
+				sk->close();
+				buff.fill(0);
+			}
+
+		}
+		while(1);
+	}
+	catch (const exception &e)
+	{
+		cout << e.what() << endl;
+	}
+}
+

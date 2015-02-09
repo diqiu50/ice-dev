@@ -1,0 +1,114 @@
+//============================================================================
+// Name        : MyTester.cpp
+// Author      : Ice
+// Version     :
+// Copyright   : Your copyright notice
+// Description : Count numbers of one in bitmap, C++, Ansi-style
+//============================================================================
+
+#include<iostream>
+#include<time.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <memory>
+
+typedef unsigned long long u64;
+typedef unsigned int u32;
+typedef unsigned short u16;
+typedef unsigned char u8;
+
+const int num = 100000000;
+
+void test1(u64*);
+void test2(u64*);
+void test3(u64*);
+
+u8 array[256];
+int main() {
+	u64* bitmap = new u64[num];
+	for (int i = rand() % num; i < num; i++)
+		memset(bitmap + rand() % num, rand() % 255, sizeof(u64));
+	for (int i=0; i<256; i++) {
+		int total = 0;
+		u8 temp = i;
+		while (temp) {
+			if (temp & 1)
+				total++;
+			temp = temp >> 1;
+		}
+		array[i] = total;
+	}
+	std::cout << "Starting ..." << std::endl;
+	u64 t = clock();
+	test1(bitmap);
+	std::cout << "Test 1: " << clock() - t << "ms" << std::endl;
+	t = clock();
+	test2(bitmap);
+	std::cout << "Test 2: " << clock() - t << "ms" << std::endl;
+	t = clock();
+	test2(bitmap);
+	std::cout << "Test 3: " << clock() - t << "ms" << std::endl;
+	delete[] bitmap;
+	return 0;
+}
+
+void test1(u64* bitmap) {
+	int total = 0;
+	u32* bit32;
+	u16* bit16;
+	u8* bit8;
+	u8 temp;
+	for (int i = 0; i < num; i++) {
+		if (bitmap[i] == 0)
+			continue;
+
+		bit32 = (u32*) &bitmap[i];
+		for (int j = 0; j < 2; j++) {
+			if (bit32[j] == 0)
+				continue;
+
+			bit16 = (u16*) &bit32[j];
+			for (int k = 0; k < 2; k++) {
+				if (bit16[k] == 0)
+					continue;
+
+				bit8 = (u8*) &bit16[k];
+				for (int m = 0; m < 2; m++) {
+					//total+=array[*bit8];
+					temp = *bit8;
+					while (temp) {
+						if (temp & 1)
+							total++;
+						temp = temp >> 1;
+					}
+				}
+			}
+		}
+	}
+	std::cout << "total " << total << std::endl;
+}
+
+void test2(u64* bitmap) {
+	int total = 0;
+	u8* bit8 = (u8*) bitmap;
+	u8 a[8] = { 0x01, 0x02, 0x04, 0x08, 0x10, 0x20, 0x40, 0x80 };
+	for (int i = 0; i < (int) (num * sizeof(u64)); i++) {
+		for (int j = 0; j < 8; j++) {
+			if ((bit8[i] & a[j]))
+				total++;
+		}
+	}
+	std::cout << "total " << total << std::endl;
+}
+
+
+void test3(u64* bitmap)
+{
+	u8* bit8 = (u8*) bitmap;
+	int total = 0;
+	for (int i = 0; i < (int) (num * sizeof(u64)); i++) {
+		total += array[bit8[i]];
+	}
+	std::cout << "total " << total << std::endl;
+}

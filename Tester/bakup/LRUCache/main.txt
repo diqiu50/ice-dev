@@ -1,0 +1,171 @@
+/*
+ * main.cpp
+ *
+ *  Created on: Oct 19, 2012
+ *      Author: Ice
+ */
+#include <iostream>
+#include <sstream>
+#include <ctime>
+#include <string>
+#include <map>
+#include <list>
+#include <stdlib.h>
+#include <assert.h>
+#include <windef.h>
+#include <windows.h>
+#include <memory>
+
+#include "LRUCache.hpp"
+
+using namespace std;
+
+const size_t MAX = 5;
+CRITICAL_SECTION cs;
+
+list<int> mSet;
+map<int, list<int>::iterator> mSetIdx;
+
+int get(int id);
+
+volatile static long sgCached = 0;
+static long sgTotal = 0;
+
+/*
+DWORD WINAPI threadFun(void *data)
+{
+	for (int i=0; i<100000000; i++)
+	{
+		int total = InterlockedExchangeAdd(&sgTotal, 1);
+		get(rand()%20);
+		if (!(total%500000))
+		{
+			ostringstream os1;
+			os1 << "cache rate: " << sgCached << "/" << sgTotal;
+			cout << os1.str() << endl;
+		}
+	}
+	return 0;
+}
+*/
+
+class A
+{
+public:
+	int mA;
+	A():mA(-1){}
+	A(int i):mA(i){
+		//cout << "xxxx" << endl;
+	}
+	~A(){}
+};
+
+struct DataGen
+{
+	int i;
+	shared_ptr<A> getData(int id)
+	{
+		shared_ptr<A> a(new A(id));
+		return a;
+	}
+	shared_ptr<A> getData(int id, shared_ptr<A> &a)
+	{
+		a->mA = id;
+		return a;
+	}
+};
+
+
+DWORD WINAPI threadFun(void *data)
+{
+	DataGen gen = {0};
+	AosLRUCache<int, shared_ptr<A>, 10> cache;
+	clock_t t1 = clock();
+	for (int i=0; i<5000000; i++)
+	{
+		int total = InterlockedExchangeAdd(&sgTotal, 1);
+		int id = rand()%5000;
+		shared_ptr<A> a;
+		if (id %10>6)
+		{
+			a = shared_ptr<A>(new A(id));
+			assert(id==a->mA);
+			cache.insert(id, a);
+			assert(id==a->mA);
+			//a = cache.get(id, gen);
+			//assert(id==a->mA);
+		}else if (id%10>1)
+		{
+			a = cache.get(id, gen);
+			assert(id==a->mA);
+		}
+		else
+		{
+			cache.remove(id);
+		}
+		//cout << id << "," << a.mA << endl;
+		if (!(total%500000))
+		{
+			//ostringstream os1;
+			//os1 << "cache rate: " << sgCached << "/" << sgTotal;
+			//cout << os1.str() << endl;
+			cout << "hit rate: " << cache.hitRate() << endl;
+		}
+	}
+	cout << "time : " << clock()-t1 << endl;
+	return 0;
+}
+
+int main(int argc, char **argv)
+{
+	InitializeCriticalSection(&cs);
+	DWORD tid1;//, tid2, tid3, tid4;
+	HANDLE t1 = CreateThread(NULL, 0, threadFun, &tid1, 0, &tid1);
+	cout << "New thread : " << tid1 << endl;
+	//HANDLE t2 = CreateThread(NULL, 0, threadFun, &tid2, 0, &tid2);
+	//cout << "New thread : " << tid2 << endl;
+	//HANDLE t3 = CreateThread(NULL, 0, threadFun, &tid3, 0, &tid3);
+	//cout << "New thread : " << tid3 << endl;
+	//HANDLE t4 = CreateThread(NULL, 0, threadFun, &tid4, 0, &tid4);
+	//cout << "New thread : " << tid4 << endl;
+
+	WaitForSingleObject(t1, INFINITE);
+	//WaitForSingleObject(t2, INFINITE);
+	//WaitForSingleObject(t3, INFINITE);
+	//WaitForSingleObject(t4, INFINITE);
+	DeleteCriticalSection(&cs);
+	return 0;
+}
+
+int get(int id)
+{
+	int value;
+	EnterCriticalSection(&cs);
+	map<int, list<int>::iterator>::iterator itrmap = mSetIdx.find(id);
+	if (itrmap != mSetIdx.end())
+	{
+		InterlockedExchangeAdd(&sgCached, 1);
+		list<int>::iterator itrlist = itrmap->second;
+		value = *itrlist;
+		assert(value==id);
+		mSet.push_front(value);
+		mSet.erase(itrlist);
+		itrmap->second = mSet.begin();
+	}
+	else
+	{
+		value = id;
+		if (mSetIdx.size() > MAX)
+		{
+			int old = mSet.back();
+			map<int, list<int>::iterator>::iterator itrmap = mSetIdx.find(old);
+			assert(itrmap != mSetIdx.end());
+			mSetIdx.erase(itrmap);
+			mSet.pop_back();
+		}
+		mSet.push_front(value);
+		mSetIdx[value] = mSet.begin();
+	}
+	LeaveCriticalSection(&cs);
+	return value;
+}

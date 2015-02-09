@@ -1,0 +1,74 @@
+/*
+ * main.cpp
+ *
+ *  Created on: 2013-4-23
+ *      Author: Ice
+ */
+
+#include <iostream>
+using namespace std;
+
+template <class T>
+class NewHandlerSupport {
+public:
+	static new_handler set_new_headler(new_handler p) {
+        new_handler oldHandler = currentHandler;
+        currentHandler = p;
+        return oldHandler;
+    }
+	static void* operator new(size_t size) {
+        new_handler globalHandler = std::set_new_handler(currentHandler);
+        void *memory;
+        try {
+            memory = ::operator new(size);
+        }
+        catch (std::bad_alloc& e) {
+            std::set_new_handler(globalHandler);
+            throw e;
+        }
+
+        return memory;
+    }
+
+private:
+	static new_handler currentHandler;
+};
+
+template <class T>
+new_handler NewHandlerSupport<T>::currentHandler;
+
+class Tester: public NewHandlerSupport<Tester> {
+	char mData[1000000];
+public:
+	static void outOfMemory() {
+		cout << "out of memory" << endl;
+		Sleep(10000);
+	}
+};
+
+class A{
+	int mA;
+public:
+	A():mA(0){}
+	virtual ~A(){}
+	virtual void print()
+	{
+
+	}
+	virtual void print1()
+	{
+
+	}
+};
+
+int main() {
+	cout << sizeof(A) << endl;
+	return 0;
+	Tester::set_new_headler((Tester::outOfMemory));
+	for (int i=0; i<10000; i++)
+	{
+		Tester *t = new Tester();
+		delete t;
+	}
+	return 0;
+}

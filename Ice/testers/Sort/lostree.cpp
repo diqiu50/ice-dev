@@ -14,6 +14,7 @@ struct sort_data{
 
 int main(int argc, char** argv)
 {
+	int merge_data[20] = {0};
 	int f1[5] = {3, 7, 7, 14, 16};
 	int f2[5] = {2, 4, 10, 12, 19};
 	int f3[5] = {5, 6, 7, 8, 11};
@@ -68,22 +69,54 @@ int main(int argc, char** argv)
 				win = lstree[p_idx];
 				lstree[p_idx] = tmp;
 			}
+			else if (buff[lstree[p_idx]]== buff[win])
+			{
+				if (buff[win] != min_val && buff[win] != max_val)
+				{
+					if (sds[win].pos<sds[win].num)
+					{
+						merge_data[buff[win]] ++;
+						//buff[win] = sds[win].data[sds[win].pos];
+						sds[win].pos++;
+						//buff[win] = sds[win].data[sds[win].pos++];
+					}
+					else
+					{
+						buff[win] = max_val;
+					}
+					p_idx = (i+sds.size())/2;
+					continue;
+				}
+			}
 			p_idx = p_idx/2;
 		}
 		lstree[0] = win;
 	}
 
 	
-	int total = 5*4;
+	int total = 5*6;
 	vector<int> v;
 	do {
 		int idx = lstree[0];
-		v.push_back(buff[idx]);
+
+		a:
+		if (buff[idx]==max_val) break;
+		int value = buff[idx];
 
 		if (sds[idx].pos<sds[idx].num)
 			buff[idx] = sds[idx].data[sds[idx].pos++];
 		else
 			buff[idx] = max_val;
+
+		if (value != buff[idx])
+		{
+			v.push_back(value);
+		}
+		else
+		{
+			merge_data[buff[idx]] ++;
+			goto a;
+		}
 
 		int win = idx;
 		int p_idx = (idx+sds.size())/2;
@@ -95,11 +128,28 @@ int main(int argc, char** argv)
 				win = lstree[p_idx];
 				lstree[p_idx] = tmp;
 			}
+			else if (buff[lstree[p_idx]]== buff[win])
+			{
+				if (buff[win] != min_val && buff[win] != max_val)
+				{
+					if (sds[win].pos<sds[win].num)
+					{
+						merge_data[buff[win]] += buff[lstree[p_idx]];
+						//buff[win] = sds[win].data[sds[win].pos];
+						sds[win].pos++;
+						//buff[win] = sds[win].data[sds[win].pos++];
+					}
+					else
+						buff[win] = max_val;
+					p_idx = (idx+sds.size())/2;
+					continue;
+				}
+			}
 			p_idx = p_idx/2;
 		}
 		lstree[0] = win;
-	}while(--total);
+	}while(1);
 
 	for (int i=0; i<v.size(); i++)
-		cout << v[i] << endl;
+		cout << "key : " << v[i] << " # value : " << merge_data[v[i]] << ". "<<  endl;
 }

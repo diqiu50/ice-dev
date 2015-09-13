@@ -1,10 +1,8 @@
 #!/bin/bash 
-# ssh-multi 
-# D.Kovalov 
-# Based on http://linuxpixies.blogspot.jp/2011/06/tmux-copy-mode-and-how-to-control.html 
+# Barry.Niu
 
 
-# a script to ssh multiple servers over multiple tmux panes 
+# a script to attach gdb over jimodb.
 
 
 user=`whoami`
@@ -16,15 +14,14 @@ starttmux() {
      #fi 
 
      #local Exes=( $Exes ) 
-     tmux new-window 
-     #unset Exes[0]; 
+	 mkdir -p /tmp/${user}
      for i in "${Exes[@]}"
 	 do 
 		 num=`pgrep -u ${user} $i|wc -l`
 		 for((n=1;n<=${num};n++))
 		 do
 			 pid=`pgrep -u ${user} $i|sed -n ${n}p`
-			 source_txt="source_"${i}"_"${n}".txt"
+			 source_txt="/tmp/${user}/source_"${i}"_"${n}".txt"
 			 echo "attach $pid" > $source_txt
 			 echo "b alarm.c:50" >> $source_txt
 			 echo "shell tmux select-layout tiled > /dev/null" >> $source_txt
@@ -33,13 +30,10 @@ starttmux() {
 			 tmux split-window -h  "gdb -x $source_txt" 
 	 	done
      done 
- 
 
  } 
- 
 
 # Exes=${Exes:=$*} 
 Exes=(frontend.exe cube.exe task.exe)
 
 starttmux 
-#bash -x tmux.sh 192.168.99.26 192.168.99.27 192.168.99.28 192.168.99.29 192.168.99.30 192.168.99.31 192.168.99.32 192.168.99.33 192.168.99.34 192.168.99.35 192.168.99.36 192.168.99.37 192.168.99.38 192.168.99.39 192.168.99.40 192.168.99.41 

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+	<title>WebSocket</title>
+	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
+	<script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script type="text/javascript">
+		ws = new WebSocket("ws://192.168.99.8:3700/echo");
+		$(document).ready(
+			function(){
+				ws.onerror = function(err) {
+					console.log("error: " + err);
+				}
+				ws.onopen = function(env) {
+					ws.send("hello");
+				}
+				ws.onmessage = function(event){
+					$("#txt").text(event.data);
+				}
+
+				var i = 1;
+				$("#bt").click(
+					function(){
+						console.log("111");
+						ws.send(i + "click!");
+						console.log("222");
+						i++;
+					}
+				)
+			}
+		)
+	</script>
+</head>
+<body>
+	<button id="bt">Click</button>
+	<p id="txt">xxxxx</p>
+</body>
+</html>

@@ -1,28 +1,39 @@
-n<!DOCTYPE html>
+<!DOCTYPE html>
 <html>
 <head>
 	<title>WebSocket</title>
 	<meta http-equiv="X-UA-Compatible" content="IE=Edge">
 	<script src="http://apps.bdimg.com/libs/jquery/2.1.1/jquery.min.js"></script>
+	<script src="http://smoothiecharts.org/smoothie.js"></script>
 	<script type="text/javascript">
 		ws = new WebSocket("ws://192.168.99.8:3700/echo");
+		var cpu = new TimeSeries();
 		$(document).ready(
 			function(){
 				ws.onerror = function(err) {
 					console.log("error: " + err);
 				}
 				ws.onopen = function(env) {
-					ws.send("hello");
+				ws.send('{"firstName":"Brett"}');
 				}
 				ws.onmessage = function(event){
 					$("#txt").text(event.data);
+					value = $.parseJSON(event.data);
+					console.log(value.cpu_usage);
+					cpu.append(new Date().getTime(), value.cpu_usage);
 				}
+
+				var chart = new SmoothieChart({maxValue:102, minValue:0, labels:{disabled:true},
+					grid:{strokeStyle:'rgba(119,119,119,0.58)',verticalSections:10}});
+				chart.addTimeSeries(cpu, 
+					{ strokeStyle: 'rgba(0, 255, 0, 1)', fillStyle: 'rgba(0, 255, 0, 0.2)', lineWidth: 1});
+				chart.streamTo(document.getElementById("chart"), 1000);
 
 				var i = 1;
 				$("#bt").click(
 					function(){
 						console.log("111");
-						ws.send(i + "click!");
+						//ws.send(i + "click!");
 						console.log("222");
 						i++;
 					}
@@ -33,6 +44,7 @@ n<!DOCTYPE html>
 </head>
 <body>
 	<button id="bt">Click</button>
-	<p id="txt">xxxxx</p>
+	<p id="txt"></p>
+	<canvas id="chart" width="400" height="100"></canvas>
 </body>
 </html>

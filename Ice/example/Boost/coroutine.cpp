@@ -2,6 +2,7 @@
 #include <vector>
 #include <boost/coroutine/all.hpp>
 #include <boost/asio.hpp>
+#include <boost/bind.hpp>
 #include <boost/asio/deadline_timer.hpp>
 #include <thread>
 #include <queue>
@@ -10,37 +11,55 @@
 
 using namespace std;
 
+class Call;
 
-queue<boost::coroutines::symmetric_coroutine<int>::call_type *> req_queue2;
+
+queue<Call*> req_queue2;
 mutex m2;
 condition_variable cv2;
 
-void
-make_coroutine_call(int &a)
+class Call
 {
-	// 3. create a coroutine
-    boost::coroutines::symmetric_coroutine<int>::call_type *coro_a = new 
-		boost::coroutines::symmetric_coroutine<int>::call_type(
-        [&](boost::coroutines::symmetric_coroutine<int>::yield_type& yield){
+	typedef boost::coroutines::symmetric_coroutine<void> coro;
+	coro::call_type mCoroutine;
+	int mId;
+
+	public:
+
+	Call(int id):
+	mCoroutine(boost::bind(&Call::func, this, _1)),
+	mId(id)
+	{
+	}
+
+	void run(){
+		mCoroutine();
+	}
+
+	virtual void func(coro::yield_type &yield)
+	{
 			//do something
-			int i = yield.get();
-			cout << i << ": do step 1" << endl;
-			a++;
+			cout << mId << ": do step 1" << endl;
 
 			// 5. make an asynchronous network request
 			unique_lock<mutex> lk(m2);
-			req_queue2.push(coro_a);
+			req_queue2.push(this);
 			cv2.notify_one();
 			lk.unlock();
 
 			// 6. give up the cup and suspend current coroutine.
 			yield();
-			cout << i << ": do step 2" << endl;
-        }
-	);
 
-	// 4. start the coroutine
-	(*coro_a)(a);
+			cout << mId << ": do step 2" << endl;
+		
+	}
+};
+
+void
+make_coroutine_call(int &a)
+{
+	Call *ab = new Call(a);
+	ab->run();	
 }
 
 queue<int> req_queue;
@@ -82,12 +101,12 @@ int main(int argc, char **argv) {
 				}
 				else {
 					// 7. the data has complete. wake up the coroutine.
-					boost::coroutines::symmetric_coroutine<int>::call_type *req = req_queue2.front();		
+					Call *req = req_queue2.front();		
 					req_queue2.pop();
 					lk.unlock();
-					sleep(rand()%5);
+					sleep(rand()%5+1);
 					// 8. resume the coroutine execution. 
-					(*req)(5);
+					req->run();	
 					// 9 releae the coroutine.
 					delete req;
 				}
@@ -97,16 +116,21 @@ int main(int argc, char **argv) {
 
 	//1. add some call request.
 	unique_lock<mutex> lk(m);
+	req_queue.push(1);
+	req_queue.push(2);
 	req_queue.push(3);
 	req_queue.push(4);
 	req_queue.push(5);
 	req_queue.push(6);
+	req_queue.push(7);
+	req_queue.push(8);
 	cv.notify_one();
 	lk.unlock();
 	
 	t1.join();
-
+	return 0;
 }
 
 
+//g++ coroutine.cpp -std=c++11 -lboost_system -lboost_coroutine
 

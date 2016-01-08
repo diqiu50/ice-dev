@@ -1,3 +1,5 @@
+'use strict'
+
 var mysql = require('mysql');                    
 var Application = require('./application');                    
 var async = require('async')
@@ -21,29 +23,37 @@ var AppMgr = {
 				callback();
 			});
 	},
-	getApp: function(hostname, url, callback){
-		console.log(22222);
+	createApp: function(hostname, url, callback){
+		var app;
+		if (url == '/') {
+			console.log("create def app:");
+			app = AppMgr.smApps[100000];
+			callback(app);
+			return;
+		}
+
 		var key = hostname + "_" + url;	
-		appid = AppMgr.smMapping[key];
+		var appid = AppMgr.smMapping[key];
 		if (appid) {
 			callback(AppMgr.smApps[appid]);
 		} else {
 			//console.log("SELECT * from apps_t where hostname='" + hostname + "' and url='" + url + "'");
 			db.query("SELECT * from apps_t where hostname='" + hostname + "' and url='" + url + "'",
 				function(err, rows, fields){
-					console.log(33333);
 					if (err) throw err;
-					var app = AppMgr.smApps[100000];
 					if (rows.length == 1) {
-						console.log("create app " + rows[0].app_id);
-						ap = Application.create(rows[0].app_id, rows[0]);
+						console.log("create app: " + rows[0].app_id);
+						app = Application.create(rows[0].app_id, rows[0], db);
 						AppMgr.smApps[rows[0].app_id] = app;
 					} else {
-						console.log("create def app");
+						console.log("can't create app: ");
 					}
 					callback(app);
 				});
 		}
+	},
+	getApp: function(appid){
+		return AppMgr.smApps[appid];
 	},
 	stop : function() {
 		db.end();

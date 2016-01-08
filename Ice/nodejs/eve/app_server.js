@@ -1,8 +1,11 @@
+'use strict'
+
 var express = require('express');
 var bodyParser = require('body-parser');
 var session = require('express-session');
 var cookieParser = require('cookie-parser');
 var AppMgr = require('./appmgr');
+var AppConfig = require('./config');
 
 var app_svr = express();
 
@@ -15,21 +18,22 @@ app_svr.use(bodyParser.json({limit: '10mb'}));
 app_svr.use(bodyParser.urlencoded({extended: true}));
 
 app_svr.use(function(req, res, next) {
-	console.log("url:" + req.originalUrl);
-	if (req.session.app) {
-		console.log("find app:" + req.session.app.appid);
+	console.log("access url:" + req.originalUrl);
+	if (req.session.appid) {
+		console.log("find app:");
 		next();
+		return;
 	} else {
-		AppMgr.getApp(req.hostname, req.originalUrl, function(app){
-			console.log(444444);
-			req.session.app = app;
-			console.log(app);
+		console.log("create app:");
+		AppMgr.createApp(req.hostname, req.originalUrl, function(app){
+			if (app) req.session.appid = app.appid;
 			next();
 		});
 	}
+	return;
 });
 
-app_svr.use(express.static("webapp",{index:"index.html"}));
+app_svr.use(express.static(AppConfig.web_base, {index:"index.html"}));
 
 
 app_svr.all('/svrcmd/:reqid', function(req, res) {
@@ -66,14 +70,21 @@ app_svr.all('/svrcmd/:reqid', function(req, res) {
 
 app_svr.use(function(req, res, next) {
 	console.log("404 url:" + req.originalUrl);
-	if (req.session.app) {
-		var app = req.session.app;
-		app.loadResource(req.originalUrl, function (file){
-			if (err) res.send('404');
-			res.sendFile(file);
+	if (req.session.appid) {
+		var app = AppMgr.getApp(req.session.appid);
+		app.loadResource(req.originalUrl, function (success, file){
+			if (success) {
+				var str = file["contents"];
+				res.send(str);
+			} else {
+				res.send("404 " + req.originalUrl);
+			}
 		});
 	}
-	res.send("404");
+	else
+	{
+		res.send("404 " + req.originalUrl);
+	}
 });
 
 

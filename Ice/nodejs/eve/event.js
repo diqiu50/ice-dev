@@ -5,5 +5,3 @@ function event(type, env) {
 
 
 var ev = new event("login", {})
-
-console.log(ev.type);

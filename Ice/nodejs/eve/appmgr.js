@@ -41,12 +41,12 @@ var AppMgr = {
 				if (err) throw err;
 				var appid;
 				if (rows.length == 1) {
-					console.log("find app: " + rows[0].app_id);
+					//console.log("find app: " + rows[0].app_id);
 					var app = Application.create(rows[0].app_id, rows[0], db);
 					AppMgr.smApps[rows[0].app_id] = app;
 					appid = rows[0].app_id;
 				} else {
-					console.log("not find app: "+ hostname + " " + url);
+					//console.log("not find app: "+ hostname + " " + url);
 				}
 				callback(appid);
 			});

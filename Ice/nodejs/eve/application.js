@@ -18,8 +18,6 @@ var Application = {
 			}
 			if (url == "/") url = "/index.html"
 			
-			console.log("load file: " + url); 
-
 			//console.log("SELECT uri, contents from res_t where uri='" + 
 			//		url + "' and app_id='" + this.appid + "'");
 			this.mDbConn.query("SELECT uri, contents from res_t where uri='" + 
@@ -37,7 +35,7 @@ var Application = {
 				}
 				fs.writeFile(filename, rows[0].contents, function(err) {
 					if (err) throw err;	
-					console.log("write file: " + filename); 
+					//console.log("write file: " + filename); 
 					callback(true, "/appid_" + app.appid + rows[0].uri);
 				});
 			});

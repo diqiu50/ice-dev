@@ -21,7 +21,7 @@ app_svr.use(bodyParser.urlencoded({extended: true}));
 app_svr.use(cookieParser());
 
 app_svr.use(function(req, res, next) {
-	console.log("Access url:" + req.originalUrl);
+	console.log("access url: " + req.originalUrl);
 	var appid;
 	var url = Url.parse(req.originalUrl, true);
 	if (url.path.indexOf("/appid_") == 0) {
@@ -41,15 +41,18 @@ app_svr.use(function(req, res, next) {
 	}
 
 	if (req.session.appid) {
+		console.log("access app: " + req.session.appid);
 		next();
 		return;
 	}
 
 	AppMgr.loadApp(req.hostname, url, function(appid) {
 		if (appid) {
+			console.log("load app: " + appid);
 			req.session.appid = appid;
 		} else {
-			res.send("Invalid app: " + req.originalUrl);
+			console.log("load app faild : " + url.href);
+			res.send("404 url 0: " + req.originalUrl);
 			return;
 		}
 		next();
@@ -95,18 +98,30 @@ app_svr.all('/svrcmd/:reqid', function(req, res) {
 var option = {root: 'webapp'}
 
 app_svr.use(function(req, res, next) {
-	console.log("404 url:" + req.originalUrl);
-	console.log("23232 " +  req.session.appid)
+	console.log("404 url 0: " + req.originalUrl);
 	var app = AppMgr.getApp(req.session.appid);
 	if (!app) {
-		res.send("404 App not find: " + req.originalUrl);
+		console.log("505 app not find: " + req.originalUrl);
+		res.send("500 App not find: " + req.originalUrl);
 	} else {
 		var url = Url.parse(req.originalUrl);
 		app.loadResource(url.path, function (success, file){
 			if (success) {
+				console.log("404 find res: " + file);
 				res.sendFile(file, {root: AppConfig.web_base});
 			} else {
-				res.send("404 url not find: " + url.href);
+				console.log("404 url 1: " + req.originalUrl);
+				AppMgr.loadApp(req.hostname, url, function(appid) {
+					if (appid) {
+						console.log("404 load app: " + appid);
+						req.session.appid = appid;
+						res.redirect(req.originalUrl);
+					} else {
+						console.log("404 load app faild: " + url.href);
+						res.send("404 url 1: " + req.originalUrl);
+						return;
+					}
+				});
 			}
 		});
 	}

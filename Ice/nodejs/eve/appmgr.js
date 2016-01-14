@@ -19,38 +19,37 @@ var AppMgr = {
 		db.query("SELECT * from apps_t where app_id=100000",
 			function(err, rows, fields){
 				if (err) throw err;
-				AppMgr.smApps[100000] = Application.create(100000, rows, db);
+				AppMgr.smApps[100000] = Application.create(100000, rows[0], db);
 				callback();
 			});
 	},
-	createApp: function(hostname, url, callback){
-		var app;
-		if (url == '/') {
-			console.log("create def app:");
-			app = AppMgr.smApps[100000];
-			callback(app);
-			return;
-		}
 
-		var key = hostname + "_" + url;	
+	loadApp: function(hostname, url, callback){
+		if (url.path == "/") url.path = "/index.html";
+		var key = hostname + "_" + url.path;	
 		var appid = AppMgr.smMapping[key];
 		if (appid) {
-			callback(AppMgr.smApps[appid]);
-		} else {
-			//console.log("SELECT * from apps_t where hostname='" + hostname + "' and url='" + url + "'");
-			db.query("SELECT * from apps_t where hostname='" + hostname + "' and url='" + url + "'",
-				function(err, rows, fields){
-					if (err) throw err;
-					if (rows.length == 1) {
-						console.log("create app: " + rows[0].app_id);
-						app = Application.create(rows[0].app_id, rows[0], db);
-						AppMgr.smApps[rows[0].app_id] = app;
-					} else {
-						console.log("can't create app: ");
-					}
-					callback(app);
-				});
+			return callback(appid);
 		}
+		AppMgr.createApp(hostname, url.path, callback);
+	},
+
+	createApp: function(hostname, url, callback){
+		//console.log("SELECT * from apps_t where hostname='" + hostname + "' and url='" + url + "'");
+		db.query("SELECT * from apps_t where hostname='" + hostname + "' and url='" + url + "'",
+			function(err, rows, fields){
+				if (err) throw err;
+				var appid;
+				if (rows.length == 1) {
+					console.log("find app: " + rows[0].app_id);
+					var app = Application.create(rows[0].app_id, rows[0], db);
+					AppMgr.smApps[rows[0].app_id] = app;
+					appid = rows[0].app_id;
+				} else {
+					console.log("not find app: "+ hostname + " " + url);
+				}
+				callback(appid);
+			});
 	},
 	getApp: function(appid){
 		return AppMgr.smApps[appid];

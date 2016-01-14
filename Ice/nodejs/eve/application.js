@@ -1,6 +1,7 @@
 'use strict'
 
 var fs = require('fs');
+var mkdirp = require('mkdirp');
 var AppConfig = require('./config');
 
 var Application = {
@@ -11,14 +12,16 @@ var Application = {
 		app.mDbConn = db;
 		app.mResources = [],
 		app.loadResource = function(url, callback){
-			var path = "/" + this.appid + "/";
+			var path = "/appid_" + this.appid + "/";
 			if (url.indexOf(path) == 0) {
 				url = url.substring(path.length-1);
 			}
-			if (url == "/") {
-				url = "/index.html"
-			}
+			if (url == "/") url = "/index.html"
+			
+			console.log("load file: " + url); 
 
+			//console.log("SELECT uri, contents from res_t where uri='" + 
+			//		url + "' and app_id='" + this.appid + "'");
 			this.mDbConn.query("SELECT uri, contents from res_t where uri='" + 
 					url + "' and app_id='" + this.appid + "'", function(err, rows, fields) {
 				if (err) throw err;	
@@ -26,15 +29,16 @@ var Application = {
 					callback(false, "")
 					return;
 				}
-				var filename = AppConfig.web_base + "/" + app.appid + rows[0].uri;
+				
+				var filename = AppConfig.web_base + "/appid_" + app.appid + rows[0].uri;
 				var dirname = filename.substring(0, filename.lastIndexOf('/'));
 				if (!fs.existsSync(dirname)) {
-					fs.mkdirSync(dirname);
+					mkdirp.sync(dirname);
 				}
 				fs.writeFile(filename, rows[0].contents, function(err) {
 					if (err) throw err;	
 					console.log("write file: " + filename); 
-					callback(true, rows[0]);
+					callback(true, "/appid_" + app.appid + rows[0].uri);
 				});
 			});
 		};

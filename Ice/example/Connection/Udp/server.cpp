@@ -32,9 +32,9 @@ int main(int argc, char **arvg)
 			total +=n;
 			buff[n] = 0;
 			//if ((i%1000)==0) printf("total recv %dk\n", total/1000);
-			printf("recieve msg[%s:%d]:%d\n", inet_ntoa(cliaddr.sin_addr), 
+			printf("recieve msg[%s:%d]:(%d)%s\n", inet_ntoa(cliaddr.sin_addr), 
 					//ntohs(cliaddr.sin_port), buff);
-					ntohs(cliaddr.sin_port), n);
+					ntohs(cliaddr.sin_port), n, buff);
 			//sendto(sockfd, buff, strlen(buff), 0, (struct sockaddr *)&cliaddr, alen);
 		}
 		else

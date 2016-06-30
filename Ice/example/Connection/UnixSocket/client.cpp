@@ -55,10 +55,11 @@ int main(int argc, char** argv)
 	char a[100];
 	char b;
 	u64 t0 = OmnGetTimestamp();
-	int MAXLEN  = 4096;
+	int MAXLEN  = 1024*1024;
 	char obj[MAXLEN];
 	long long i=0;
 	time_t t = time(NULL);
+	long total = 0;
 	while(1)
 	{
 		i++;
@@ -66,9 +67,11 @@ int main(int argc, char** argv)
 		{
 			int t2 = time(NULL);
 			if(t2-t)
-				cout << "total write: " << i/(t2-t) << ",totol per sec: " << i*MAXLEN/(t2-t) << endl;
+				cout << "total write: " << total << ",totol per sec: " << total/(t2-t)/1024/1024 << endl;
 		}
-		write(fd, obj, MAXLEN);
+		int n = write(fd, obj, MAXLEN);
+		assert(n>0);
+		total += n;
 		//read(fd, obj, MAXLEN);
 	}
 	sleep(100);

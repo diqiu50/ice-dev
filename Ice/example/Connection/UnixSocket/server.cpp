@@ -64,6 +64,8 @@ int main(int argc, char** argv)
 	char obj[MAXLEN];
 	long long i=0;
 	time_t t = time(NULL);
+
+	long total = 0;
 	while(1)
 	{
 		i++;
@@ -71,14 +73,11 @@ int main(int argc, char** argv)
 		{
 			int t2 = time(NULL);
 			if(t2-t)
-				cout << "total read: " << i/(t2-t) << ",total per sec: " << i*MAXLEN/(t2-t)/1024/1024 << endl;
+				cout << "total read: " << total << ",total per sec: " << total/(t2-t)/1024/1024 << endl;
 		}
 		int n = read(cltfd, obj, MAXLEN);
-		if (n == -1)
-		{
-			perror("faild to read");
-			return -1;
-		}
+		assert(n>0);
+		total+=n;
 
 	}
 	sleep(100);

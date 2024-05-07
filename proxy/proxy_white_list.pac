@@ -3,6 +3,7 @@ var proxy = "PROXY 112.81.83.18:14576; DIRECT";
 
 var proxyRules = [
     ".openai.com",
+    ".chatgpt.com",
 ];
 
 function FindProxyForURL(url, host) {

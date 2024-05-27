@@ -1,5 +1,4 @@
-var proxy = "PROXY 112.81.83.18:14578; DIRECT";
-
+var proxy = 'SOCKS5 112.81.83.18:14578; SOCKS 112.81.83.18:14578; DIRECT;';
 
 var proxyRules = [
     ".openai.com",

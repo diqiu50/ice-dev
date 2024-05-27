@@ -1,4 +1,4 @@
-var proxy = '112.81.83.18:14578';
+var proxy = 'PROXY 112.81.83.18:14578';
 
 var proxyRules = [
     ".openai.com",
